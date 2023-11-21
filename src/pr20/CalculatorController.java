@@ -28,72 +28,29 @@ public class CalculatorController extends JFrame {
     public static String buttonMethod(CalcModel model, String buttonText, String labelText) {
         String result = "";
 
-        if (buttonText.equals("=")) {
-            String infixExpression = labelText.replace("n", "-").replace("_", "").trim();
-            try {
-                String postfixExpression = infixToPostfix(infixExpression);
-                String[] expressionTokens = postfixExpression.split(" ");
-                result = calculation(model, expressionTokens);
-            } catch (IllegalArgumentException e) {
-                result = "Error: Invalid expression";
-            }
-        } else if (buttonText.matches("[0-9.]")) {
-            result = labelText + buttonText;
-        } else if (buttonText.matches("[/*+-]")) {
-            result = labelText + " " + buttonText.replace("n", "-") + " ";
+        if (buttonText.compareTo("C") == 0) {
+            result = "";
+        } else if (buttonText.compareTo("_") == 0) {
+            result = labelText + " ";
+        } else if (buttonText.compareTo("<") == 0) {
+            result = deleteLastSymbol(labelText);
+        } else if (buttonText.compareTo("=") == 0) {
+            result = calculation(model, labelText);
+        } else {
+            result = labelText + buttonText + " ";
         }
-
         return result;
     }
-    private static String infixToPostfix(String infix) {
-        Stack<Character> operatorStack = new Stack<>();
-        StringBuilder postfix = new StringBuilder();
-        String[] tokens = infix.split(" ");
-
-        for (String token : tokens) {
-            if (token.matches("[0-9.]+")) {
-                postfix.append(token).append(" ");
-            } else if (token.matches("[/*+\\-]")) {
-                char operator = token.charAt(0);
-                while (!operatorStack.isEmpty() && getPrecedence(operatorStack.peek()) >= getPrecedence(operator)) {
-                    postfix.append(operatorStack.pop()).append(" ");
-                }
-                operatorStack.push(operator);
-            } else if (token.equals("(")) {
-                operatorStack.push('(');
-            } else if (token.equals(")")) {
-                while (!operatorStack.isEmpty() && operatorStack.peek() != '(') {
-                    postfix.append(operatorStack.pop()).append(" ");
-                }
-                if (!operatorStack.isEmpty() && operatorStack.peek() == '(') {
-                    operatorStack.pop();
-                }
-            }
-        }
-
-        while (!operatorStack.isEmpty()) {
-            postfix.append(operatorStack.pop()).append(" ");
-        }
-
-        return postfix.toString().trim();
-    }
-    private static int getPrecedence(char operator) {
-        if (operator == '+' || operator == '-') {
-            return 1;
-        } else if (operator == '*' || operator == '/') {
-            return 2;
-        }
-        return 0;
-    }
-
-
-    public static String calculation(CalcModel model, String[] items) {
+    public static String calculation(CalcModel model, String expression) {
         model.clearStack();
+        String[] items = expression.split(" ");
         String result = "";
+
         for (String item : items) {
-            if (item.compareTo("end") == 0)
-                break;
-            else if (isInteger(item)) {
+            if (item.isEmpty()) {
+                continue;
+            }
+            if (isInteger(item)) {
                 model.eventTick(Integer.parseInt(item));
             } else if (isDouble(item)) {
                 model.eventTick(Double.parseDouble(item));
@@ -104,9 +61,9 @@ public class CalculatorController extends JFrame {
                 }
             }
         }
+
         return model.toString();
     }
-
     public static String deleteLastSymbol(String s) {
         String ns = "";
         for (int i = 0; i < s.length() - 1; i++) {

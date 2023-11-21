@@ -29,14 +29,6 @@ public class Test {
 
         // Удаляем заказ со стола 9
         orderManager.removeOrder(9);
-
-        // Попытка удалить заказ с уже освобожденного стола 9
-        orderManager.removeOrder(9);
-        try {
-            orderManager.removeOrder(9);
-        } catch (IllegalTableNumber e) {
-            System.out.println("Произошла ошибка: " + e.getMessage());
-        }
         orderManager.add(orders[1], 3);
 
         System.out.println("Общая стоимость заказов: " + orderManager.ordersCostSummary());
